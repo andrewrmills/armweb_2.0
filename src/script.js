@@ -49,7 +49,7 @@ const textureLoader = new THREE.TextureLoader()
              'Andrew Mills',
              {
                  font: font,
-                 size: 0.5,
+                 size: 2,
                  height: 0.2,
                  curveSegments: 5,
                  bevelEnabled: true,
@@ -63,10 +63,35 @@ const textureLoader = new THREE.TextureLoader()
          const material = new THREE.MeshNormalMaterial
          // textMaterial.wireframe = true
          const text = new THREE.Mesh(textGeometry, material)
-         text.position.set(0, -0.5, -2)
+         text.position.set(-10, -5, -25)
          scene.add(text)
         }
  )
+ fontLoader.load(
+    '/fonts/helvetiker_regular.typeface.json',
+    (font) => {
+        const subTextGeometry = new TextGeometry(
+            'Developer, Pipe Dreamer, All Round Nice Guy.',
+            {
+                font: font,
+                size: 1,
+                height: 0.2,
+                curveSegments: 5,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelOffset: 0,
+                bevelSegments: 4
+            }
+        )
+        subTextGeometry.center()
+        const material = new THREE.MeshNormalMaterial
+        // textMaterial.wireframe = true
+        const subText = new THREE.Mesh(subTextGeometry, material)
+        subText.position.set(-4, -11, -25)
+        scene.add(subText)
+       }
+)
 
 // Meshes
 const objectsDistance = 4
@@ -84,13 +109,9 @@ const moonMesh = new THREE.Mesh(
 moonMesh.castShadow = true
 moonMesh.receiveShadow = true
 
-mesh1.position.y = 1
-moonMesh.position.y = -objectsDistance * 10
+mesh1.position.set(0, 0, -2)
+moonMesh.position.set(0, -objectsDistance * 10, -30)
 
-mesh1.position.x = 0
-moonMesh.position.x = 0
-
-moonMesh.position.z = -30
 scene.add(mesh1, moonMesh)
 
 // const sectionMeshes = [mesh1, mesh2, mesh3]
@@ -236,7 +257,7 @@ window.addEventListener('mousemove', (event) =>
     const t = document.body.getBoundingClientRect().top/sizes.height
 
     if(t < 0){
-        mesh1.position.z = t * objectsDistance
+        mesh1.position.z = -2 + t * objectsDistance
         mesh1.position.y = t * (objectsDistance * 2)  
     }
     if(mesh1.position.y < 0.5){
