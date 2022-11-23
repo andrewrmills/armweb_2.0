@@ -126,8 +126,8 @@ scene.add(particles)
 /**
  * Lights
  */
-const directionalLight = new THREE.DirectionalLight('#ffffff', 1)
-directionalLight.position.set(1, 1, 0)
+const directionalLight = new THREE.DirectionalLight('#ffffff', 0.8)
+directionalLight.position.set(3, 1, 0)
 directionalLight.castShadow = true
 
 const ambientLight = new THREE.AmbientLight('#ffffff', 0.2)
@@ -235,16 +235,13 @@ window.addEventListener('mousemove', (event) =>
  const moveCamera = () => {
     const t = document.body.getBoundingClientRect().top/sizes.height
 
-
     if(t < 0){
         mesh1.position.z = t * objectsDistance
-        mesh1.position.y = t * (objectsDistance * 2)
-        
+        mesh1.position.y = t * (objectsDistance * 2)  
     }
-    if(mesh1.position.y < 0){
+    if(mesh1.position.y < 0.5){
         camera.lookAt(mesh1.position)
     }
-    console.log(mesh1.position.y)
   }
 
 const clock = new THREE.Clock()
