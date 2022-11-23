@@ -147,9 +147,21 @@ scene.add(particles)
 /**
  * Lights
  */
-const directionalLight = new THREE.DirectionalLight('#ffffff', 0.8)
-directionalLight.position.set(3, 1, 0)
+const directionalLight = new THREE.DirectionalLight('#ffffff', 0.4)
+directionalLight.position.set(0, 1.5, 0.5)
 directionalLight.castShadow = true
+
+directionalLight.shadow.mapSize.width = 1024
+directionalLight.shadow.mapSize.height = 1024
+directionalLight.shadow.camera.near = 1
+directionalLight.shadow.camera.far = 40
+directionalLight.shadow.camera.top = 20
+directionalLight.shadow.camera.right = 20
+directionalLight.shadow.camera.bottom = - 2
+directionalLight.shadow.camera.left = - 20
+
+// const directionalLightCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+// scene.add(directionalLightCameraHelper)
 
 const ambientLight = new THREE.AmbientLight('#ffffff', 0.2)
 
@@ -159,6 +171,8 @@ gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
 gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
 
 scene.add(directionalLight, ambientLight)
+
+console.log(directionalLight.shadow)
 
 /**
  * Sizes
@@ -204,6 +218,7 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.shadowMap.enabled = true
 
 /**
  * Scroll
