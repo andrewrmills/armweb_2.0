@@ -1,8 +1,10 @@
 import './style.css'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
-import { MeshBasicMaterial } from 'three'
+import { MeshBasicMaterial, SphereGeometry } from 'three'
 import gsap from 'gsap'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 
 /**
  * Debug
@@ -34,40 +36,64 @@ const scene = new THREE.Scene()
  */
 // Texture
 const textureLoader = new THREE.TextureLoader()
-const gradientTexture = textureLoader.load('textures/gradients/3.jpg')
-gradientTexture.magFilter = THREE.NearestFilter
+// const matcapTexture = textureLoader.load('/textures/matcaps/1.png')
 
-// Material
-const material = new THREE.MeshToonMaterial({ 
-    color: parameters.materialColor,
-    gradientMap: gradientTexture
-})
+/**
+ * Fonts
+ */
+ const fontLoader = new FontLoader()
+ fontLoader.load(
+     '/fonts/helvetiker_regular.typeface.json',
+     (font) => {
+         const textGeometry = new TextGeometry(
+             'Andrew Mills',
+             {
+                 font: font,
+                 size: 0.5,
+                 height: 0.2,
+                 curveSegments: 5,
+                 bevelEnabled: true,
+                 bevelThickness: 0.03,
+                 bevelSize: 0.02,
+                 bevelOffset: 0,
+                 bevelSegments: 4
+             }
+         )
+         textGeometry.center()
+         const material = new THREE.MeshNormalMaterial
+         // textMaterial.wireframe = true
+         const text = new THREE.Mesh(textGeometry, material)
+         text.position.set(0, -0.5, -2)
+         scene.add(text)
+        }
+ )
 
 // Meshes
 const objectsDistance = 4
 const mesh1 = new THREE.Mesh(
-    new THREE.TorusGeometry(1, 0.4, 16, 60),
-    material
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshStandardMaterial
 )
-const mesh2 = new THREE.Mesh(
-    new THREE.ConeGeometry(1, 2, 32),
-    material
+mesh1.castShadow = true
+mesh1.receiveShadow = true
+
+const moonMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(20, 32, 16),
+    new THREE.MeshStandardMaterial
 )
-const mesh3 = new THREE.Mesh(
-    new THREE.TorusKnotGeometry(0.8, 0.35, 100, 16),
-    material
-)
+moonMesh.castShadow = true
+moonMesh.receiveShadow = true
 
-mesh1.position.y = -objectsDistance * 0
-mesh2.position.y = -objectsDistance * 1
-mesh3.position.y = -objectsDistance * 2
+mesh1.position.y = 1
+moonMesh.position.y = -objectsDistance * 10
 
-mesh1.position.x = 2
-mesh2.position.x = -2
-mesh3.position.x = 2
-scene.add(mesh1, mesh2, mesh3)
+mesh1.position.x = 0
+moonMesh.position.x = 0
 
-const sectionMeshes = [mesh1, mesh2, mesh3]
+moonMesh.position.z = -30
+scene.add(mesh1, moonMesh)
+
+// const sectionMeshes = [mesh1, mesh2, mesh3]
 
 /**
  * Particles
@@ -78,9 +104,9 @@ const positions = new Float32Array(particlesCount * 3)
 
 for (let i = 0; i < particlesCount; i++)
 {
-    positions[i * 3 + 0] = (Math.random() - 0.5) * 10
-    positions[i * 3 + 1] = objectsDistance * 0.5 - Math.random() * objectsDistance * sectionMeshes.length
-    positions[i * 3 + 2] = -5 + (Math.random() - 0.5) * 10
+    positions[i * 3 + 0] = (Math.random() - 0.5) * 50
+    positions[i * 3 + 1] = objectsDistance * 2.5 - Math.random() * objectsDistance * 10
+    positions[i * 3 + 2] = -30 + (Math.random() - 0.5) * 10
 }
 
 const particlesGeometry = new THREE.BufferGeometry()
@@ -90,7 +116,7 @@ particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 
 const particlesMaterial = new THREE.PointsMaterial({
     color: parameters.materialColor,
     sizeAttenuation: true,
-    size: 0.03
+    size: 0.1
 })
 
 // Points
@@ -102,7 +128,16 @@ scene.add(particles)
  */
 const directionalLight = new THREE.DirectionalLight('#ffffff', 1)
 directionalLight.position.set(1, 1, 0)
-scene.add(directionalLight)
+directionalLight.castShadow = true
+
+const ambientLight = new THREE.AmbientLight('#ffffff', 0.2)
+
+gui.add(directionalLight, 'intensity').min(0).max(1).step(0.001)
+gui.add(directionalLight.position, 'x').min(- 5).max(5).step(0.001)
+gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
+gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
+
+scene.add(directionalLight, ambientLight)
 
 /**
  * Sizes
@@ -153,31 +188,31 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Scroll
  */
 
-let scrollY = window.scrollY
-let currentSection = 0
+// let scrollY = window.scrollY
+// let currentSection = 0
 
-window.addEventListener('scroll', () => 
-{
-    scrollY = window.scrollY
+// window.addEventListener('scroll', () => 
+// {
+//     scrollY = window.scrollY
 
-    const newSection = Math.round(scrollY/sizes.height)
+//     const newSection = Math.round(scrollY/sizes.height)
 
-    if(newSection != currentSection)
-    {
-        currentSection = newSection
+//     if(newSection != currentSection)
+//     {
+//         currentSection = newSection
 
-        gsap.to (
-            sectionMeshes[currentSection].rotation, 
-            {
-                duration: 1.5,
-                ease: 'power2.inOut',
-                x: '+= 6',
-                y: '+= 3',
-                z: "+= 1.5"
-            }
-        )
-    }
-})
+//         gsap.to (
+//             sectionMeshes[currentSection].rotation, 
+//             {
+//                 duration: 1.5,
+//                 ease: 'power2.inOut',
+//                 x: '+= 6',
+//                 y: '+= 3',
+//                 z: "+= 1.5"
+//             }
+//         )
+//     }
+// })
 
 /**
  * Cursor
@@ -196,6 +231,22 @@ window.addEventListener('mousemove', (event) =>
 /**
  * Animate
  */
+
+ const moveCamera = () => {
+    const t = document.body.getBoundingClientRect().top/sizes.height
+
+
+    if(t < 0){
+        mesh1.position.z = t * objectsDistance
+        mesh1.position.y = t * (objectsDistance * 2)
+        
+    }
+    if(mesh1.position.y < 0){
+        camera.lookAt(mesh1.position)
+    }
+    console.log(mesh1.position.y)
+  }
+
 const clock = new THREE.Clock()
 let previousTime = 0
 
@@ -214,11 +265,12 @@ const tick = () =>
     cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime
 
     // Animate meshes
-    for (const mesh of sectionMeshes)
-    {
-        mesh.rotation.x += deltaTime * 0.1
-        mesh.rotation.y += deltaTime * 0.12
-    }
+    mesh1.rotation.x += deltaTime * 0.1
+    mesh1.rotation.y += deltaTime * 0.12
+    
+    document.body.onscroll = moveCamera
+    moveCamera();
+    
 
     // Render
     renderer.render(scene, camera)
