@@ -327,9 +327,9 @@ window.addEventListener('mousemove', (event) =>
         mesh1.position.z = -2 + t * objectsDistance
         mesh1.position.y = t * (objectsDistance * 2)  
     }
-    // if(mesh1.position.y < 0.5){
-    //     camera.lookAt(mesh1.position)
-    // }
+    if(mesh1.position.y < 0.5){
+        camera.lookAt(mesh1.position)
+    }
   }
 
 const clock = new THREE.Clock()
