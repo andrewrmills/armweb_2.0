@@ -5,6 +5,7 @@ import { MeshBasicMaterial, SphereGeometry } from 'three'
 import gsap from 'gsap'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 /**
  * Debug
@@ -30,6 +31,41 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
+
+/**
+ * Models
+ */
+ const gltfLoader = new GLTFLoader()
+
+let lander
+
+const loadObject = () => {
+gltfLoader.load(
+    '/models/lander.glb',
+    (gltf) =>
+    {
+        lander = gltf.scene
+        gltf.scene.scale.set(0.3, 0.3, 0.3)
+        gltf.scene.position.set(2, 0, 0)
+        scene.add(lander)
+
+        gui
+        .add(gltf.scene.rotation, 'y')
+        .min(-Math.PI)
+        .max(Math.PI)
+        .step(0.01)
+        .name('rotation')
+
+        init()
+
+    }
+)
+}
+
+loadObject()
+const init = () => {
+    // camera.lookAt(lander.position)
+}
 
 /**
  * Objects
@@ -71,7 +107,7 @@ const textureLoader = new THREE.TextureLoader()
     '/fonts/helvetiker_regular.typeface.json',
     (font) => {
         const subTextGeometry = new TextGeometry(
-            'Developer, Pipe Dreamer, All Round Nice Guy.',
+            'Developer. Pipe Dreamer. All Round Nice Guy.',
             {
                 font: font,
                 size: 1,
@@ -209,16 +245,32 @@ const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 
 camera.position.z = 6
 cameraGroup.add(camera)
 
+
 /**
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
-    alpha: true
+    alpha: true,
+    antialias: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+renderer.physicallyCorrectLights = true
+renderer.outputEncoding = THREE.sRGBEncoding
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 3
 renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFShadowMap
+
+gui.add(renderer, 'toneMapping', {
+    No: THREE.NoToneMapping,
+    Linear: THREE.LinearToneMapping,
+    Reinhard: THREE.ReinhardToneMapping,
+    Cineon: THREE.CineonToneMapping,
+    ACESFilmic: THREE.ACESFilmicToneMapping
+})
+gui.add(renderer, 'toneMappingExposure').min(0).max(10).step(0.001)
 
 /**
  * Scroll
@@ -275,9 +327,9 @@ window.addEventListener('mousemove', (event) =>
         mesh1.position.z = -2 + t * objectsDistance
         mesh1.position.y = t * (objectsDistance * 2)  
     }
-    if(mesh1.position.y < 0.5){
-        camera.lookAt(mesh1.position)
-    }
+    // if(mesh1.position.y < 0.5){
+    //     camera.lookAt(mesh1.position)
+    // }
   }
 
 const clock = new THREE.Clock()
