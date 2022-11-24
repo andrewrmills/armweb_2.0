@@ -45,8 +45,11 @@ gltfLoader.load(
     (gltf) =>
     {
         lander = gltf.scene
-        gltf.scene.scale.set(0.3, 0.3, 0.3)
-        gltf.scene.position.set(2, 0, 0)
+        lander.scale.set(0.3, 0.3, 0.3)
+        lander.position.set(0, 0, 0)
+        lander.rotation.x = 0.5
+        lander.castShadow = true
+        lander.receiveShadow = true
         scene.add(lander)
 
         gui
@@ -56,16 +59,14 @@ gltfLoader.load(
         .step(0.01)
         .name('rotation')
 
-        init()
+        // init()
 
     }
 )
 }
 
 loadObject()
-const init = () => {
-    // camera.lookAt(lander.position)
-}
+
 
 /**
  * Objects
@@ -131,12 +132,6 @@ const textureLoader = new THREE.TextureLoader()
 
 // Meshes
 const objectsDistance = 4
-const mesh1 = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshStandardMaterial
-)
-mesh1.castShadow = true
-mesh1.receiveShadow = true
 
 const moonMesh = new THREE.Mesh(
     new THREE.SphereGeometry(20, 32, 16),
@@ -145,12 +140,11 @@ const moonMesh = new THREE.Mesh(
 moonMesh.castShadow = true
 moonMesh.receiveShadow = true
 
-mesh1.position.set(0, 0, -2)
+
 moonMesh.position.set(0, -objectsDistance * 10, -30)
 
-scene.add(mesh1, moonMesh)
+scene.add(moonMesh)
 
-// const sectionMeshes = [mesh1, mesh2, mesh3]
 
 /**
  * Particles
@@ -323,12 +317,10 @@ window.addEventListener('mousemove', (event) =>
  const moveCamera = () => {
     const t = document.body.getBoundingClientRect().top/sizes.height
 
-    if(t < 0){
-        mesh1.position.z = -2 + t * objectsDistance
-        mesh1.position.y = t * (objectsDistance * 2)  
-    }
-    if(mesh1.position.y < 0.5){
-        camera.lookAt(mesh1.position)
+    if(lander){
+        camera.lookAt(lander.position)
+        lander.position.z = -2 + t * objectsDistance
+        lander.position.y = t * (objectsDistance * 2)  
     }
   }
 
@@ -349,9 +341,11 @@ const tick = () =>
     cameraGroup.position.x += (parallaxX - cameraGroup.position.x) * 5 * deltaTime
     cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime
 
-    // Animate meshes
-    mesh1.rotation.x += deltaTime * 0.1
-    mesh1.rotation.y += deltaTime * 0.12
+    // Animate lander
+
+    if(lander) {
+        lander.rotation.y += deltaTime * 0.12
+    }
     
     document.body.onscroll = moveCamera
     moveCamera();
