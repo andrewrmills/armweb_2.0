@@ -11,6 +11,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
  * Debug
  */
 const gui = new dat.GUI()
+const debugObject = {}
 
 const parameters = {
     materialColor: '#ffeded'
@@ -35,6 +36,20 @@ const scene = new THREE.Scene()
 /**
  * Models
  */
+
+ const updateAllMaterials = () => 
+ {
+     scene.traverse((child) => 
+     {
+         if(child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial)
+         {
+             child.material.envMapIntensity = debugObject.envMapIntensity
+             child.material.needsUpdate = true
+             child.castShadow = true
+             child.receiveShadow = true
+         }
+     })
+ }
  const gltfLoader = new GLTFLoader()
 
 let lander
@@ -59,7 +74,7 @@ gltfLoader.load(
         .step(0.01)
         .name('rotation')
 
-        // init()
+        updateAllMaterials()
 
     }
 )
