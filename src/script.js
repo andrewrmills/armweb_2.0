@@ -1,8 +1,6 @@
 import './style.css'
 import * as THREE from 'three'
 import * as dat from 'lil-gui'
-import { MeshBasicMaterial, SphereGeometry } from 'three'
-import gsap from 'gsap'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -88,7 +86,32 @@ loadObject()
  */
 // Texture
 const textureLoader = new THREE.TextureLoader()
-// const matcapTexture = textureLoader.load('/textures/matcaps/1.png')
+
+const moonColorTexture = textureLoader.load('./textures/moon/Dirt_BaseColor.jpg')
+const moonAmbientOcclusionTexture = textureLoader.load('./textures/moon/Dirt_AmbientOcclusion.jpg')
+const moonHeightTexture = textureLoader.load('./textures/moon/Dirt_Height.png')
+const moonNormalTexture = textureLoader.load('./textures/moon/Dirt_Normal.jpg')
+const moonRoughnessTexture = textureLoader.load('./textures/moon/Dirt_Roughness.jpg')
+
+moonColorTexture.repeat.set(15, 15)
+moonAmbientOcclusionTexture.repeat.set(15, 15)
+moonHeightTexture.repeat.set(15, 15)
+moonNormalTexture.repeat.set(15, 15)
+moonRoughnessTexture.repeat.set(15, 15)
+
+moonColorTexture.wrapS = THREE.RepeatWrapping
+moonAmbientOcclusionTexture.wrapS = THREE.RepeatWrapping
+moonHeightTexture.wrapS = THREE.RepeatWrapping
+moonNormalTexture.wrapS = THREE.RepeatWrapping
+moonRoughnessTexture.wrapS = THREE.RepeatWrapping
+
+moonColorTexture.wrapT = THREE.RepeatWrapping
+moonAmbientOcclusionTexture.wrapT = THREE.RepeatWrapping
+moonHeightTexture.wrapT = THREE.RepeatWrapping
+moonNormalTexture.wrapT = THREE.RepeatWrapping
+moonRoughnessTexture.wrapT = THREE.RepeatWrapping
+
+const matcapTexture = textureLoader.load('/textures/matcaps/1.png')
 
 /**
  * Fonts
@@ -150,7 +173,13 @@ const objectsDistance = 4
 
 const moonMesh = new THREE.Mesh(
     new THREE.SphereGeometry(20, 32, 16),
-    new THREE.MeshStandardMaterial
+    new THREE.MeshStandardMaterial({
+        map: moonColorTexture,
+        aoMap: moonAmbientOcclusionTexture,
+        // displacementMap: moonHeightTexture,
+        normalMap: moonNormalTexture,
+        roughnessMap: moonRoughnessTexture
+    })
 )
 moonMesh.castShadow = true
 moonMesh.receiveShadow = true
@@ -164,7 +193,7 @@ scene.add(moonMesh)
 /**
  * Particles
  */
-// Geometry
+//Geometry
 const particlesCount = 1000
 const positions = new Float32Array(particlesCount * 3)
 
@@ -217,7 +246,7 @@ gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
 
 scene.add(directionalLight, ambientLight)
 
-console.log(directionalLight.shadow)
+// console.log(directionalLight.shadow)
 
 /**
  * Sizes
@@ -336,6 +365,11 @@ window.addEventListener('mousemove', (event) =>
         camera.lookAt(lander.position)
         lander.position.z = -2 + t * objectsDistance
         lander.position.y = t * (objectsDistance * 2)  
+        if(lander.position.y < -26.8)
+        {
+            lander.position.y = -26.8
+            lander.position.z = -15.4
+        }
     }
   }
 
@@ -358,7 +392,7 @@ const tick = () =>
 
     // Animate lander
 
-    if(lander) {
+    if(lander && lander.position.y > -10) {
         lander.rotation.y += deltaTime * 0.12
     }
     
